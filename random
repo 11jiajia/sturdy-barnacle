@@ -1,0 +1,42 @@
+#include <iostream>
+#include <TRandom3.h>
+#include <TFile.h>
+#include <TTree.h>
+#include <TH1F.h>
+
+int main() {
+  // 创建ROOT文件
+  TFile* file = new TFile("random_numbers.root", "RECREATE");
+  
+  // 创建TTree并设置branch
+  TTree* tree = new TTree("random_tree", "Random Numbers");
+  double random_number;
+  tree->Branch("random_number", &random_number, "random_number/D");
+  
+  // 创建TRandom3对象用于生成随机数
+  TRandom3* rand = new TRandom3();
+
+  // 生成1000个随机数，并将其写入TTree
+  for (int i = 0; i < 1000; ++i) {
+    random_number = rand->Rndm();
+    tree->Fill();
+  }
+  
+  // 将TTree写入ROOT文件
+  tree->Write();
+  
+  // 创建直方图并填充随机数
+  TH1F* hist = new TH1F("random_hist", "Random Number Histogram", 100, 0, 1);
+  tree->Draw("random_number>>random_hist");
+  
+  // 将直方图写入ROOT文件
+  hist->Write();
+  
+  // 关闭ROOT文件
+  file->Close();
+  
+  delete file;
+  delete rand;
+  
+  return 0;
+}
